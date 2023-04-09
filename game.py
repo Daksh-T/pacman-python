@@ -128,12 +128,18 @@ def main():
         all_sprites.add(wall)
 
     # Add pellets
-    for _ in range(100):
+    wall_rects = [s.rect for s in walls.sprites()]
+    max, s = 100, 0
+    while s< max:
         x = random.randrange(1, WIDTH // GRID_SIZE - 1) * GRID_SIZE
         y = random.randrange(1, HEIGHT // GRID_SIZE - 1) * GRID_SIZE
+        
         pellet = Pellet(x, y)
-        pellets.add(pellet)
-        all_sprites.add(pellet)
+        # Check https://www.pygame.org/docs/ref/rect.html#pygame.Rect.collidelist
+        if pellet.rect.collidelist(wall_rects) < 0:
+            pellets.add(pellet)
+            all_sprites.add(pellet)
+            s+=1
 
     # Add ghosts
     for _ in range(5):
@@ -156,16 +162,23 @@ def main():
 
         # Handle user input (move Pac-Man)
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP]:
+        # Add as many combos you'd like
+        key_combos = {
+            "up" : (keys[pygame.K_UP], keys[pygame.K_w]),
+            "down" : (keys[pygame.K_DOWN], keys[pygame.K_s]),
+            "right" : (keys[pygame.K_RIGHT], keys[pygame.K_d]),
+            "left" : (keys[pygame.K_LEFT], keys[pygame.K_a])
+        }
+        if any(key_combos["up"]):
             pacman.update_position(0, -GRID_SIZE, walls)
             pygame.time.delay(120)
-        if keys[pygame.K_DOWN]:
+        if any(key_combos["down"]):
             pacman.update_position(0, GRID_SIZE, walls)
             pygame.time.delay(120)
-        if keys[pygame.K_LEFT]:
+        if any(key_combos["left"]):
             pacman.update_position(-GRID_SIZE, 0, walls)
             pygame.time.delay(120)
-        if keys[pygame.K_RIGHT]:
+        if any(key_combos["right"]):
             pacman.update_position(GRID_SIZE, 0, walls)
             pygame.time.delay(120)
 
